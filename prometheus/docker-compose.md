@@ -1,3 +1,4 @@
+```yaml
 version: '3.8'
 
 services:
