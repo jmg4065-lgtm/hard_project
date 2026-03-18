@@ -1,3 +1,4 @@
+```yaml
 global:
   scrape_interval: 15s
 
