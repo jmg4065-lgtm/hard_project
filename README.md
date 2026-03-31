@@ -20,11 +20,19 @@
 * **CPU/Memory Utilization:** 서버 자원 과부하 상태를 0-100% 범위로 시각화합니다.
 * **VPN / Tunnel Status:** Cloudflare Tunnel을 통한 연결 이력을 타임라인으로 기록하여 과거 장애 시점을 추적합니다.
 
+### 4. Monitoring Automation & Optimization
+* IaC 기반 설정 자동화: 앤서블 동적 인벤토리를 활용하여 Karpenter 등으로 인해 수시로 변하는 AWS 노드 IP를 사람의 개입 없이 프로메테우스 타겟에 즉시 반영.
+* 데이터 연속성 보장 (Labeling): 인스턴스 재생성 시 IP가 변경되어도 고정된 node_name 라벨을 유지하여 Grafana 대시보드의 메트릭 단절 현상 해결.
+* 배포 파이프라인 최적화: GitHub Actions Runner 내에 boto3 등 필수 의존성을 포함시켜, 로컬 환경에 구애받지 않는 독립적인 배포 환경 구축.
+
 ## 🛠 Tech Stack
 * **Monitoring:** Prometheus, Grafana
 * **Data Collector:** Node Exporter
 * **Connectivity:** Cloudflare Tunnel (VPN)
 * **Infrastructure:** On-premise Server, AWS EC2 (EKS)
+* Ansible Dynamic Inventory: AWS API 연동을 통한 가변 IP 인스턴스 자동 추적 및 관리
+* Jinja2 Templating: Prometheus 설정 파일(.yml)의 동적 생성 및 배포 자동화
+* GitHub Actions CI/CD: 인프라 변경 사항 실시간 반영 및 패키지 의존성 자동 해결
 
 ## 📂 Project Structure
 * `/prometheus`: Prometheus 설정 파일 (`prometheus.yml`) 및 실행 가이드
