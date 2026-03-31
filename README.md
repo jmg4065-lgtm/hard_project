@@ -37,3 +37,27 @@
 ## 📂 Project Structure
 * `/prometheus`: Prometheus 설정 파일 (`prometheus.yml`) 및 실행 가이드
 * `/grafana`: 대시보드 JSON 템플릿 및 설정값
+
+## 🛠 Troubleshooting & Optimization
+
+프로젝트 구축 과정에서 발생한 주요 기술적 이슈와 해결 과정을 기록합니다.
+
+### 1. 가변 IP 환경에서의 타겟 인식 및 배포 자동화
+* **Issue:** 테라폼 인프라 업데이트 및 Karpenter 노드 재생성 시 EC2의 Public IP가 수시로 변경되어 모니터링 단절 발생.
+* **Solution:** * Ansible **Dynamic Inventory(`aws_ec2`)**를 도입하여 실시간으로 실행 중인 인스턴스 IP를 페칭.
+    * Prometheus 설정 파일을 **Jinja2 템플릿**화하여 배포 시점에 최신 IP가 자동 기입되도록 파이프라인 구축.
+* **Result:** 인프라 변경 후 별도의 수동 수정 없이 GitHub Actions 배포만으로 모니터링 환경 동기화 완료.
+
+### 2. Grafana 메트릭 데이터의 연속성 보장 (Labeling)
+* **Issue:** 서버 재생성 후 IP가 바뀌면 그라파나가 이를 새로운 인스턴스로 인식하여 기존 데이터와 그래프가 끊기는 현상 발생.
+* **Solution:** Prometheus의 `relabel_configs`를 활용하여 IP 기반의 `instance` 라벨 대신, Ansible에서 부여한 고정 논리 이름인 `node_name` 라벨을 메트릭의 식별자로 강제 매핑.
+* **Result:** 서버가 삭제되고 재생성되어도 동일한 이름표(Label)를 유지함으로써 대시보드의 **데이터 연속성 확보**.
+
+### 3. GitHub Actions 배포 동시성 제어 및 Helm Lock 이슈
+* **Issue:** 협업 과정에서 다수의 배포가 겹치거나 비정상 종료될 때 `UPGRADE FAILED: another operation in progress` 에러와 함께 배포가 중단됨.
+* **Solution:** * `helm list`를 통한 릴리즈 상태 점검 및 `helm rollback` 명령어로 Pending 상태의 락(Lock) 해제.
+    * 팀원 간 작업 현황 실시간 공유 및 인프라 변경 시점 조율 프로세스 확립.
+
+### 4. 대규모 불필요 파일 추적(10K+ files)으로 인한 Git 성능 저하
+* **Issue:** Python 가상환경(`venv`) 폴더가 `.gitignore` 설정 전 Index에 포함되어 1만 개 이상의 불필요한 파일이 커밋 대상에 포함됨.
+* **Solution:** `git rm -r --cached .` 명령을 통해 전체 캐시를 초기화한 후, 정교화된 `.gitignore`를 재적용하여 순수 소스 코드만 관리하도록 정형화.
