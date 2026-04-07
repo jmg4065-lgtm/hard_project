@@ -4,7 +4,7 @@
 온프레미스 서버와 AWS 클라우드 간의 가상 사설망(VPN) 연결 및 재해 복구(DR) 상태를 실시간으로 관제하는 모니터링 시스템입니다.
 
 ## 📊 Monitoring Dashboard (Grafana)
-![최종 대시보드 스크린샷을 이곳에 업로드후 경로를 넣으세요](images/dashboard_final.png)
+![최종 대시보드 스크린샷을 이곳에 업로드후 경로를 넣으세요](images/dash1.png)(images/dash2.png)
 
 ### 1. 핵심 관제 지표 (Global Status)
 * **On-Premise / AWS Health:** 각 센터 서버의 생존 상태를 실시간으로 확인합니다. (ONLINE/OFFLINE)
