@@ -4,26 +4,28 @@
 온프레미스 서버와 AWS 클라우드 간의 가상 사설망(VPN) 연결 및 재해 복구(DR) 상태를 실시간으로 관제하는 모니터링 시스템입니다.
 
 ## 📊 Monitoring Dashboard (Grafana)
-![최종 대시보드 스크린샷을 이곳에 업로드후 경로를 넣으세요](images/dash1.png)(images/dash2.png)
+![최종 대시보드 스크린샷 1](images/dash1.png)
+![최종 대시보드 스크린샷 2](images/dash2.png)
 
-### 1. 핵심 관제 지표 (Global Status)
-* **On-Premise / AWS Health:** 각 센터 서버의 생존 상태를 실시간으로 확인합니다. (ONLINE/OFFLINE)
-* **Real-time RTO (Recovery Time Objective):** 장애 발생 후 복구까지 걸리는 시간을 측정하며, 목표치(10분) 초과 시 시각적 경고를 보냅니다.
-* **Real-time RPO (Recovery Point Objective):** 데이터 유실 지점을 모니터링하여 DB 동기화 상태를 체크합니다.
+### 1️⃣ 인프라 자원 및 노드 생존 상태 (Infra Resource & Node Health Status)
+* **On-Premise Resource Usage:** Master, Worker 01, Worker 02 노드의 CPU 및 Memory 사용량을 게이지(Gauge) 차트로 시각화하여 자원 과부하를 실시간 감시합니다.
+* **On-Premise Master Status:** 온프레미스 메인 서버의 실시간 생존 상태를 표시합니다. (**ACTIVE** - 정상 가동 시 녹색)
+* **AWS-Worker Node Status:** 클라우드 재해 복구용 복제 노드의 대기 상태를 모니터링합니다. (**STANDBY** - 대기 상태 시 적색 표시)
 
-### 2. 서비스 및 네트워크 지연 (Service & Connectivity)
-* **Network Latency (ms):** 클라우드 간 통신 지연 시간을 밀리초 단위로 추적하여 연결 품질을 감시합니다.
-* **Error Rate (%):** 사용자에게 발생하는 HTTP 5xx 에러율을 게이지로 표시합니다.
-* **NFS Free Storage:** 복제 데이터가 저장될 공유 스토리지의 잔여 용량을 감시합니다.
+### 2️⃣ 클라우드 오토스케일링 지표 (AWS EKS Scaling Metrics)
+* **EKS Auto-Scaling (HPA & Karpenter):** 서비스 부하 및 재해 복구 시 트래픽 유입에 따른 Pod와 Node의 자동 증설(Scaling) 추이를 타임라인 그래프로 추적합니다.
+* **인프라 확장성 검증:** 클라우드 리소스가 워크로드에 맞춰 유연하게 확장되는지 실시간 데이터로 증명합니다.
 
-### 3. 인프라 상세 자원 (Infra Detail)
-* **CPU/Memory Utilization:** 서버 자원 과부하 상태를 0-100% 범위로 시각화합니다.
-* **VPN / Tunnel Status:** Cloudflare Tunnel을 통한 연결 이력을 타임라인으로 기록하여 과거 장애 시점을 추적합니다.
+### 3️⃣ 스토리지 및 데이터 동기화 무결성 (Storage & Data Sync Integrity)
+* **Disk I/O Performance (Read/Write):** NFS(워커1)와 MySQL(워커2) 노드의 디스크 성능을 관제합니다. **`sum` 집계 함수**를 사용하여 디바이스별 중복 필드를 제거하고 노드당 순수 I/O 총량만을 표기하여 가독성을 극대화했습니다.
+* **File Sync Status (rsync):** 온프레미스 데이터의 클라우드 복제 프로세스 가동 여부를 실시간 표시합니다. (**STOPPED/RUNNING**)
+* **NFS Volume Usage:** 공유 스토리지의 잔여 용량을 백분율(%)로 감시하여 복제 실패를 방지합니다.
+* **MySQL Replication Lag (RPO):** DB 동기화 지연 시간을 초(s) 단위로 측정하여 데이터 유실 지점(RPO)을 정밀 관리합니다.
 
-### 4. Monitoring Automation & Optimization
-* IaC 기반 설정 자동화: 앤서블 동적 인벤토리를 활용하여 Karpenter 등으로 인해 수시로 변하는 AWS 노드 IP를 사람의 개입 없이 프로메테우스 타겟에 즉시 반영.
-* 데이터 연속성 보장 (Labeling): 인스턴스 재생성 시 IP가 변경되어도 고정된 node_name 라벨을 유지하여 Grafana 대시보드의 메트릭 단절 현상 해결.
-* 배포 파이프라인 최적화: GitHub Actions Runner 내에 boto3 등 필수 의존성을 포함시켜, 로컬 환경에 구애받지 않는 독립적인 배포 환경 구축.
+### 4️⃣ 서비스 성능 및 복구 결과 (Service Performance & DR Outcome)
+* **Actual RTO (Service Recovery Time):** 실제 장애 발생 시점부터 서비스 복구 완료까지 소요된 시간을 측정하여 목표 복구 시간(RTO) 달성 여부를 확인합니다.
+* **Pod Health Status:** 전체 Pod 중 정상(Active)과 에러(Errors) 상태를 카운트하여 애플리케이션 계층의 가용성을 수치화합니다.
+* **MySQL Performance (QPS & Active Conn):** 데이터베이스의 초당 쿼리 수(QPS)와 활성 연결 수를 모니터링하여 복구 후 서비스 안정성을 최종 검증합니다.
 
 ## 🛠 Tech Stack
 * **Monitoring:** Prometheus, Grafana
